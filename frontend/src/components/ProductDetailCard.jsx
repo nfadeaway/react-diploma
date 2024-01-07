@@ -76,7 +76,7 @@ const ProductDetailCard = () => {
     productDetailCard === 'loading'
       ? <Preloader/>
       : productDetailCard === 'error'
-        ? <ErrorContentLoader/> :
+        ? <ErrorContentLoader reloadData={getProductDetailCard}/> :
           <section className="catalog-item">
             <h2 className="text-center">{productDetailCard.title}</h2>
             <div className="row">

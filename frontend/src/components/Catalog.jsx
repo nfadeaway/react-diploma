@@ -20,6 +20,7 @@ const Catalog = () => {
   const searchField = useRef(null);
 
   const getCatalogProducts = async (categoryId = 'all', isBtn = false, query = undefined) => {
+    catalogProducts === 'error' && setCatalogProducts('loading');
     query = query === 'unset' ? '' : searchQuery;
     if (isBtn) {
       setMoreProductsBtnFlag('loading');
@@ -47,16 +48,22 @@ const Catalog = () => {
   };
 
   const getCategoryProducts = (e) => {
-    e.preventDefault();
-    if (e.currentTarget.classList.contains('nav-link')) {
-      setOffset(6);
-      catalogNav.current.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      getCatalogProducts(e.currentTarget.dataset.id);
+    let categoryId;
+    if (e) {
+      e.preventDefault();
+      if (e.currentTarget.classList.contains('nav-link')) {
+        setOffset(6);
+        catalogNav.current.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        getCatalogProducts(e.currentTarget.dataset.id);
+      } else {
+        categoryId = catalogNav.current.querySelector('.active').dataset.id;
+        e.currentTarget.classList.contains('btn-outline-primary') && getCatalogProducts(categoryId, true);
+        e.currentTarget.classList.contains('catalog-search-form') && setSearchQuery(searchField.current.value);
+      }
     } else {
-      const categoryId = catalogNav.current.querySelector('.active').dataset.id;
-      e.currentTarget.classList.contains('btn-outline-primary') && getCatalogProducts(categoryId,true);
-      e.currentTarget.classList.contains('catalog-search-form') && setSearchQuery(searchField.current.value);
+      categoryId = catalogNav.current.querySelector('.active').dataset.id;
+      getCatalogProducts(categoryId, true);
     }
   };
 
@@ -74,7 +81,7 @@ const Catalog = () => {
   };
 
   useEffect(() => {
-    if (location.pathname == '/') {
+    if (location.pathname === '/') {
       setSearchQuery('');
       getCatalogProducts('all', false, 'unset');
     } else {
@@ -92,9 +99,11 @@ const Catalog = () => {
   return (
     catalogProducts === 'loading' && catalogCategories === 'loading'
       ? <Preloader title={<h2 className="text-center">Каталог</h2>}/>
-      : catalogProducts === 'error' || catalogCategories === 'error'
-        ? <ErrorContentLoader/>
-        :
+      : catalogProducts === 'error'
+        ? <ErrorContentLoader reloadData={getCatalogProducts}/>
+        : catalogCategories === 'error'
+          ? <ErrorContentLoader reloadData={getCatalogCategories}/>
+          :
           <section className="catalog">
             <h2 className="text-center">Каталог</h2>
             {location.pathname === '/catalog' &&
@@ -122,7 +131,7 @@ const Catalog = () => {
             {moreProductsBtnFlag === 'loading'
               ? <Preloader/>
               : moreProductsBtnFlag === 'error'
-                ? <ErrorContentLoader/>
+                ? <ErrorContentLoader reloadData={getCategoryProducts}/>
                 : moreProductsBtnFlag === 'btn'
                   ?
                     <div className="text-center">

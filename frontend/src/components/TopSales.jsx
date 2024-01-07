@@ -8,6 +8,7 @@ const TopSales = () => {
   const [topSales, setTopSales] = useState('loading');
 
   const getTopSalesProducts = async () => {
+    topSales === 'error' && setTopSales('loading');
     try {
       let response = await fetch(import.meta.env.VITE_APP_SERVER_URL + '/api/top-sales');
       if (response.status === 200) {
@@ -27,7 +28,7 @@ const TopSales = () => {
       topSales === 'loading'
         ? <Preloader title={<h2 className="text-center">Хиты продаж!</h2>}/>
         : topSales === 'error'
-          ? <ErrorContentLoader/>
+          ? <ErrorContentLoader reloadData={getTopSalesProducts}/>
           : topSales.length > 0 &&
             <section className="top-sales">
               <h2 className="text-center">Хиты продаж!</h2>
